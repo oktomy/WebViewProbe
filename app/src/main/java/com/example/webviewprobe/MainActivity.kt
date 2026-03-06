@@ -1,10 +1,12 @@
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.webkit.*
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.example.webviewprobe.R
 import kotlinx.coroutines.*
 import kotlin.math.max
 import kotlin.math.min
@@ -22,6 +24,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvStats: TextView
     private lateinit var tvErrors: TextView
     private lateinit var webView: WebView
+	private lateinit var tvAnalysis: TextView
 
     // 測試狀態變數
     private var isRunning = false
