@@ -30,7 +30,8 @@ class MainActivity : AppCompatActivity() {
     private var maxCount = 0
     private var delayMs = 2000L
     private var targetUrl = ""
-
+    private var isWaitingForPage = false // 用來鎖定每一次的載入狀態
+    
     private var loadStartTime = 0L
     private val latencies = mutableListOf<Long>()
     private var httpErrorCount = 0
@@ -85,12 +86,16 @@ class MainActivity : AppCompatActivity() {
         webView.webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: android.graphics.Bitmap?) {
                 super.onPageStarted(view, url, favicon)
-                if (url == targetUrl) loadStartTime = System.currentTimeMillis()
+                // 移除網址比對，統一在 executeSingleLoad 紀錄開始時間最準
             }
 
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
-                if (!isRunning || url != targetUrl) return
+                
+                // 【關鍵修復】：不再比對 url 字串，只要還在等待狀態，就視為本次載入完成。
+                if (!isRunning || !isWaitingForPage) return
+                
+                isWaitingForPage = false // 成功攔截，上鎖避免重複觸發
 
                 timeoutRunnable?.let { mainHandler.removeCallbacks(it) }
                 val latency = System.currentTimeMillis() - loadStartTime
@@ -102,9 +107,7 @@ class MainActivity : AppCompatActivity() {
 
             override fun onReceivedHttpError(view: WebView?, request: WebResourceRequest?, errorResponse: WebResourceResponse?) {
                 super.onReceivedHttpError(view, request, errorResponse)
-                if (request?.isForMainFrame == true) {
-                    httpErrorCount++
-                }
+                if (request?.isForMainFrame == true) httpErrorCount++
             }
 
             override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
@@ -119,7 +122,7 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this@MainActivity, "進程崩潰(OOM)！測試停止", Toast.LENGTH_LONG).show()
                 return true
             }
-        }
+        }        
     }
 
     private fun startTest() {
@@ -174,8 +177,15 @@ class MainActivity : AppCompatActivity() {
             CookieManager.getInstance().flush()
         }
 
+        // 確保先清除前一次可能殘留的計時器
+        timeoutRunnable?.let { mainHandler.removeCallbacks(it) }
+
+        isWaitingForPage = true // 標記開始等待
+        loadStartTime = System.currentTimeMillis() // 在這裡紀錄時間最準確
+
         timeoutRunnable = Runnable {
-            if (isRunning) {
+            if (isRunning && isWaitingForPage) {
+                isWaitingForPage = false // 超時了，解除等待狀態
                 timeoutCount++
                 webView.stopLoading()
                 updateDashboard()
