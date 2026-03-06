@@ -22,6 +22,8 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.4' # 👈 新增這兩行：明確告訴 GitHub 使用 Gradle 8.4 版        
 
       # 因為沒有產生 gradlew 執行檔，我們直接呼叫系統內建的 gradle 命令
       - name: Build Debug APK
