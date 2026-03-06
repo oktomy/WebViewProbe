@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="WebView 診斷探針"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"/>
+
+            <EditText
+                android:id="@+id/etUrl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="輸入測試網址 (含 https://)"
+                android:inputType="textUri" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/etCount"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="測試次數 (例:100)"
+                    android:inputType="number" />
+
+                <EditText
+                    android:id="@+id/etDelay"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="間隔毫秒 (例:2000)"
+                    android:inputType="number" />
+            </LinearLayout>
+
+            <Switch
+                android:id="@+id/swUa"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="偽裝原生 Chrome Browser UA" />
+
+            <Switch
+                android:id="@+id/swDom"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="開啟 DOM Storage (多數前端必備)"
+                android:checked="true" />
+
+            <Switch
+                android:id="@+id/swCache"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="每次重載前清除 Cache 與 Cookie" />
+
+            <Button
+                android:id="@+id/btnStart"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="開始測試"
+                android:layout_marginTop="8dp"/>
+
+            <TextView
+                android:id="@+id/tvProgress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="進度: 0 / 0"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"/>
+
+            <TextView
+                android:id="@+id/tvStats"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="延遲 (毫秒) - 最小: 0 | 最大: 0 | 平均: 0" />
+
+            <TextView
+                android:id="@+id/tvErrors"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="異常次數 - HTTP 錯誤: 0 | OOM 白屏: 0 | Timeout: 0"
+                android:textColor="#D32F2F"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:id="@+id/tvAnalysis"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="分析報告將於測試完成後產生..."
+                android:textColor="#0277BD"
+                android:background="#E1F5FE"
+                android:padding="12dp"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:visibility="gone"/>				
+        </LinearLayout>
+    </ScrollView>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="WebView 實體觀測區:"
+        android:textStyle="bold"
+        android:layout_marginTop="8dp"/>
+
+    <WebView
+        android:id="@+id/webView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#EEEEEE"
+        android:layout_marginTop="4dp"/>
+
+</LinearLayout>
