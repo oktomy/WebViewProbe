@@ -40,7 +40,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:hint="測試次數 (例:100)"
+                    android:hint="次數(例:100)"
                     android:inputType="number" />
 
                 <EditText
@@ -48,25 +48,25 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:hint="間隔毫秒 (例:2000)"
+                    android:hint="間隔毫秒(例:2000)"
                     android:inputType="number" />
             </LinearLayout>
 
-            <Switch
-                android:id="@+id/swUa"
+            <CheckBox
+                android:id="@+id/cbUa"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="偽裝原生 Chrome Browser UA" />
 
-            <Switch
-                android:id="@+id/swDom"
+            <CheckBox
+                android:id="@+id/cbDom"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="開啟 DOM Storage (多數前端必備)"
+                android:text="開啟 DOM Storage (前端必備)"
                 android:checked="true" />
 
-            <Switch
-                android:id="@+id/swCache"
+            <CheckBox
+                android:id="@+id/cbCache"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="每次重載前清除 Cache 與 Cookie" />
@@ -90,13 +90,13 @@
                 android:id="@+id/tvStats"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="延遲 (毫秒) - 最小: 0 | 最大: 0 | 平均: 0" />
+                android:text="延遲(ms) - 最小:0 | 最大:0 | 平均:0" />
 
             <TextView
                 android:id="@+id/tvErrors"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="異常次數 - HTTP 錯誤: 0 | OOM 白屏: 0 | Timeout: 0"
+                android:text="異常 - HTTP:0 | OOM:0 | Timeout:0"
                 android:textColor="#D32F2F"
                 android:layout_marginBottom="8dp"/>
 
@@ -104,22 +104,13 @@
                 android:id="@+id/tvAnalysis"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="分析報告將於測試完成後產生..."
+                android:text="報告生成中..."
                 android:textColor="#0277BD"
                 android:background="#E1F5FE"
                 android:padding="12dp"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:visibility="gone"/>				
+                android:visibility="gone"/>
         </LinearLayout>
     </ScrollView>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="WebView 實體觀測區:"
-        android:textStyle="bold"
-        android:layout_marginTop="8dp"/>
 
     <WebView
         android:id="@+id/webView"
