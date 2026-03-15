@@ -1,9 +1,12 @@
 # 📱 WebView Diagnostic Probe (WebView 診斷探針)
 
-## 📌 專案簡介
+## 📌 專案簡介 
 本專案為內部開發的輕量級 Android 測試工具，專門用於排查「混合式架構 App (Hybrid App)」中 Web 端資料載入卡頓、白畫面 (OOM) 或無法顯示的問題。
 
 透過抽離主 App 中複雜的業務邏輯與第三方 SDK 依賴，本探針提供了一個**「純淨的 WebView 沙盒環境」**，讓 QA 與開發團隊能透過控制變數 (如 User-Agent、DOM Storage、Cache) 進行量化壓力測試，快速釐清問題是出在基礎網路設備 (WAF/防火牆)、前端網頁相容性，還是主 App 本身的資源佔用。
+
+Project Overview
+This project is an internally developed lightweight Android testing tool specifically designed to troubleshoot issues such as slow web loading, OutOfMemoryError (OOM), or inability to display data in hybrid apps. By abstracting complex business logic and third-party SDK dependencies from the main app, this probe provides a **clean WebView sandbox environment**, allowing QA and development teams to perform quantitative stress testing by controlling variables (such as User-Agent, DOM Storage, and Cache) to quickly pinpoint the source of the problem in the underlying network equipment (WAF).
 
 ---
 
@@ -19,6 +22,19 @@
   * **OOM 白屏捕捉：** 精準捕捉 WebView Render Process 崩潰事件。
   * **Timeout 看門狗：** 內建 15 秒超時強制中斷機制，避免測試死鎖。
 * **自動分析報告：** 測試完成後自動根據錯誤特徵給出排查建議。
+
+## 🚀 Core Features
+* **Automated Stress Testing:** Customizable test URL, number of consecutive reloads, and interval between each reload.
+* **Environment Variable Control:**
+* **UA Cloaking:** Switches between using the app's default User-Agent or cloaking as a pure mobile Chrome browser (for troubleshooting WAF blocking).
+* **DOM Storage On/Off:** Verifies compatibility with modern front-end frameworks (Vue/React).
+* **Incognito Testing:** Automatically clears cache and cookies before each reload.
+* **Deep Performance Monitoring:**
+Records the latency of each load and calculates the maximum, minimum, and average latency.
+* Blocks HTTP error codes (not 200 responses).
+* **OOM (Out of Memory) White Screen Capture:** Accurately captures WebView Render Process crash events.
+* **Timeout Watchdog:** Built-in 15-second timeout forced interrupt mechanism to prevent test deadlocks.
+* **Automatic Analysis Report:** Automatically provides troubleshooting suggestions based on error characteristics after test completion.
 
 ---
 
