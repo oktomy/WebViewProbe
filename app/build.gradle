@@ -27,4 +27,6 @@ dependencies {
     implementation 'com.google.android.material:material:1.11.0'
     // 協程庫 (供計時與 Timeout 使用)
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
+    // 新增：FTP 傳輸函式庫
+    implementation 'commons-net:commons-net:3.10.0'
 }
