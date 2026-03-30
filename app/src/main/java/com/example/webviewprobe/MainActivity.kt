@@ -9,6 +9,12 @@ import android.view.View
 import android.webkit.*
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import org.apache.commons.net.ftp.FTP
+import org.apache.commons.net.ftp.FTPClient
+import java.io.File
+import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -46,6 +52,19 @@ class MainActivity : AppCompatActivity() {
     private var timeoutRunnable: Runnable? = null
     private var nextLoadRunnable: Runnable? = null
 
+    // FTP
+    private lateinit var etFtpHost: EditText
+    private lateinit var etFtpUser: EditText
+    private lateinit var etFtpPw: EditText
+    private lateinit var btnUpload: Button
+    private lateinit var btnClearLog: Button
+
+    private val logFileName = "probe_logs.txt"
+    private val timeFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
+
+    // 追蹤時間戳
+    private var requestSentTime = 0L
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -56,9 +75,23 @@ class MainActivity : AppCompatActivity() {
         btnStart.setOnClickListener {
             if (isRunning) stopTest() else startTest()
         }
+
+        btnUpload.setOnClickListener { uploadLogToFtp() }
+        btnClearLog.setOnClickListener {
+            val file = File(filesDir, logFileName)
+            if (file.exists()) file.delete()
+            Toast.makeText(this, "Log 已清除", Toast.LENGTH_SHORT).show()
+        }        
     }
 
     private fun initViews() {
+
+        etFtpHost = findViewById(R.id.etFtpHost)
+        etFtpUser = findViewById(R.id.etFtpUser)
+        etFtpPw = findViewById(R.id.etFtpPw)
+        btnUpload = findViewById(R.id.btnUpload)
+        btnClearLog = findViewById(R.id.btnClearLog)
+        
         etUrl = findViewById(R.id.etUrl)
         etCount = findViewById(R.id.etCount)
         etDelay = findViewById(R.id.etDelay)
@@ -72,6 +105,18 @@ class MainActivity : AppCompatActivity() {
         tvAnalysis = findViewById(R.id.tvAnalysis)
         webView = findViewById(R.id.webView)
     }
+
+    private fun writeLog(message: String) {
+        try {
+            val file = File(filesDir, logFileName)
+            val fos = FileOutputStream(file, true) // Append 模式
+            val logEntry = "${timeFormat.format(Date())} | $message\n"
+            fos.write(logEntry.toByteArray())
+            fos.close()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }    
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebView() {
@@ -94,7 +139,13 @@ class MainActivity : AppCompatActivity() {
                 
                 // 【關鍵修復】：不再比對 url 字串，只要還在等待狀態，就視為本次載入完成。
                 if (!isRunning || !isWaitingForPage) return
+
+                val receivedTime = System.currentTimeMillis()
+                val duration = receivedTime - requestSentTime
                 
+                // 寫入本地 Log
+                writeLog("SUCCESS | URL: $url | Duration: ${duration}ms")
+               
                 isWaitingForPage = false // 成功攔截，上鎖避免重複觸發
 
                 timeoutRunnable?.let { mainHandler.removeCallbacks(it) }
@@ -110,10 +161,13 @@ class MainActivity : AppCompatActivity() {
                 if (request?.isForMainFrame == true) httpErrorCount++
             }
 
+            // 發生錯誤也紀錄 Log
             override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
                 super.onReceivedError(view, request, error)
-                if (request?.isForMainFrame == true) httpErrorCount++
-            }
+                if (request?.isForMainFrame == true) {
+                    writeLog("ERROR | URL: ${request.url} | Desc: ${error?.description}")
+                }
+            }            
 
             override fun onRenderProcessGone(view: WebView?, detail: RenderProcessGoneDetail?): Boolean {
                 oomCrashCount++
@@ -181,6 +235,9 @@ class MainActivity : AppCompatActivity() {
         timeoutRunnable?.let { mainHandler.removeCallbacks(it) }
 
         isWaitingForPage = true // 標記開始等待
+        requestSentTime = System.currentTimeMillis() // 紀錄發出請求時間        
+        writeLog("REQUEST | Round: $currentCount | Target: $targetUrl")        
+        
         loadStartTime = System.currentTimeMillis() // 在這裡紀錄時間最準確
 
         timeoutRunnable = Runnable {
@@ -238,4 +295,45 @@ class MainActivity : AppCompatActivity() {
         }
         tvAnalysis.text = report.toString()
     }
+
+    private fun uploadLogToFtp() {
+        val host = etFtpHost.text.toString()
+        val user = etFtpUser.text.toString()
+        val pw = etFtpPw.text.toString()
+
+        if (host.isEmpty()) {
+            Toast.makeText(this, "請輸入 FTP 主機", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        Thread {
+            val client = FTPClient()
+            try {
+                client.connect(host, 21)
+                client.login(user, pw)
+                client.enterLocalPassiveMode()
+                client.setFileType(FTP.BINARY_FILE_TYPE)
+
+                val logFile = File(filesDir, logFileName)
+                if (!logFile.exists()) {
+                    runOnUiThread { Toast.makeText(this, "找不到 Log 檔案", Toast.LENGTH_SHORT).show() }
+                    return@Thread
+                }
+
+                logFile.inputStream().use { 
+                    val remoteName = "Probe_${Build.MODEL}_${System.currentTimeMillis()}.txt"
+                    val success = client.storeFile(remoteName, it)
+                    runOnUiThread {
+                        if (success) Toast.makeText(this, "上傳成功: $remoteName", Toast.LENGTH_LONG).show()
+                        else Toast.makeText(this, "上傳失敗", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                client.logout()
+            } catch (e: Exception) {
+                runOnUiThread { Toast.makeText(this, "FTP 錯誤: ${e.message}", Toast.LENGTH_LONG).show() }
+            } finally {
+                client.disconnect()
+            }
+        }.start()
+    }    
 }
